@@ -27,11 +27,11 @@ public class Main {
 					try
 					{
 						TimerCount.setTimerCount(Integer.parseInt(buf[0]), Integer.parseInt(buf[1]), Integer.parseInt(buf[2]));
-						System.out.println("タイマに値を設定しました："+ buf);
+						System.out.println("タイマに値を設定しました："+ input.toString());
 					}
 					catch( NumberFormatException e )
 					{
-						System.out.println("異常な値が入力されました："+ buf);
+						System.out.println("異常な値が入力されました："+ input.toString());
 					}
 					break;
 					
@@ -45,7 +45,7 @@ public class Main {
 					break;
 					
 				default:
-					System.out.println("無効な入力値です：" + input);
+					System.out.println("無効な入力値です：" + input.toString());
 					break;
 			}
 		}

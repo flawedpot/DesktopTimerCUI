@@ -4,7 +4,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.time.LocalTime;
 
-public class TimerCount {
+public class TimerCount implements Runnable {
 
 	/* フィールド */
 	private static LocalTime timerCnt;		/* タイマのカウンタ値 */
@@ -31,41 +31,50 @@ public class TimerCount {
 		/* 上記以外 */
 		else
 		{
-			TimerCount.timer = new Timer();		/* Timerインスタンス生成 */
-			
-			/* 周期処理する処理 */
-			TimerTask task = new TimerTask()
+			new Thread(new TimerCount()).start();		/* スレッドによってカウントダウンを並列処理で実行 */
+		}
+	}
+	
+	/****************************************************/
+	/* スレッドによる並列実行させる処理                 */
+	/****************************************************/
+	@Override
+	public void run()
+	{
+		TimerCount.timer = new Timer();		/* Timerインスタンス生成 */
+		
+		/* 周期処理する処理 */
+		TimerTask task = new TimerTask()
+		{
+			@Override
+			public void run()
 			{
-				@Override
-				public void run()
+				/* カウント開始時の処理 */
+				if( false == TimerCount.timerRunFlg )
 				{
-					/* カウント開始時の処理 */
-					if( false == TimerCount.timerRunFlg )
+					TimerCount.timerRunFlg = true;						/* タイマ動作中フラグ = 動作中 に設定 */
+					System.out.println("Time Start!!");
+					System.out.println(TimerCount.getTimerCount());		/* タイマカウンタ値を標準出力に表示 */
+				}
+				/* カウント動作中の処理 */
+				else
+				{
+					TimerCount.timerCnt = TimerCount.timerCnt.minusSeconds(1);		/* タイマカウントダウン */
+					System.out.println(TimerCount.getTimerCount());					/* タイマカウンタ値を標準出力に表示 */
+					
+					/* カウントが00:00:00になったらカウントダウン終了しタイマ停止 */
+					if( true == TimerCount.timerCnt.equals(LocalTime.of(0, 0, 0)) )
 					{
-						TimerCount.timerRunFlg = true;						/* タイマ動作中フラグ = 動作中 に設定 */
-						System.out.println("Time Start!!");
-						System.out.println(TimerCount.getTimerCount());		/* タイマカウンタ値を標準出力に表示 */
-					}
-					/* カウント動作中の処理 */
-					else
-					{
-						TimerCount.timerCnt = TimerCount.timerCnt.minusSeconds(1);		/* タイマカウントダウン */
-						System.out.println(TimerCount.getTimerCount());					/* タイマカウンタ値を標準出力に表示 */
-						
-						/* カウントが00:00:00になったらカウントダウン終了しタイマ停止 */
-						if( true == TimerCount.timerCnt.equals(LocalTime.of(0, 0, 0)) )
-						{
-							TimerCount.timer.cancel();				/* タイマ停止　*/
-							TimerCount.timerRunFlg = false;			/* タイマ動作中フラグ = 停止中 に設定 */
-							System.out.println("Time Over!!");
-						}
+						TimerCount.timer.cancel();				/* タイマ停止　*/
+						TimerCount.timerRunFlg = false;			/* タイマ動作中フラグ = 停止中 に設定 */
+						System.out.println("Time Over!!");
 					}
 				}
-			};
-			
-			/* タスクを1秒周期で実行開始 */
-			TimerCount.timer.scheduleAtFixedRate(task,0,1000);
-		}
+			}
+		};
+		
+		/* タスクを1秒周期で実行開始 */
+		TimerCount.timer.scheduleAtFixedRate(task,0,1000);
 	}
 
 	/****************************************************/
